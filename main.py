@@ -1,6 +1,6 @@
 import cv2
-from time import sleep
 import numpy as np
+import pyautogui
 
 
 def show_webcam(mirror=False):
@@ -13,30 +13,35 @@ def show_webcam(mirror=False):
         blur = cv2.medianBlur(img,15)
 
         #convert to hsv
-        #hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
         #color definition
-        red_lower = np.array([140,190,210])
-        red_upper = np.array([255,255,255])
+        color_lower = np.array([70,32,21])
+        color_upper = np.array([95,185,131])
 
         #red color mask (sort of thresholding, actually segmentation)
-        mask = cv2.inRange(blur, red_lower, red_upper)
+        mask = cv2.inRange(hsv, color_lower, color_upper)
 
         connectivity = 4  
         # Perform the operation
         output = cv2.connectedComponentsWithStats(mask, connectivity, cv2.CV_32S)
         # Get the results
+        try:
+            print('Main coord:', list(output[3][1]))
+            pyautogui.moveTo(*list(output[3][1]))
+            num_labels = output[0]-1
 
-        num_labels = output[0]-1
+            centroids = output[3][1:]
+        
+            #print results
+            print ('number of dots, should be 1:', num_labels )
+            print ('array of dot center coordinates:', centroids)
+        except Exception:
+            pass
 
-        centroids = output[3][1:]
-        #print results
-        print ('number of dots, should be 4:',num_labels )
-        print ('array of dot center coordinates:',centroids)
-        cv2.imshow('my webcam', mask)
+        cv2.imshow('Green Mask', mask)
         if cv2.waitKey(1) == 27: 
             break  # esc to quit
-        sleep(0.5)
     cv2.destroyAllWindows()
 
 
