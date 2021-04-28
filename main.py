@@ -5,6 +5,8 @@ import pyautogui
 
 def show_webcam(mirror=False):
     cam = cv2.VideoCapture(0)
+
+    pre_pos = None
     while True:
         ret_val, img = cam.read()
         if mirror: 
@@ -28,7 +30,12 @@ def show_webcam(mirror=False):
         # Get the results
         try:
             print('Main coord:', list(output[3][1]))
-            pyautogui.moveTo(*list(output[3][1]))
+            pos = [*output[3][1]]
+            if pre_pos and cv2.waitKey(1) == 17:
+                pyautogui.move(pos[0] - pre_pos[0], pos[1] - pre_pos[1])
+
+            pre_pos = pos
+            #pyautogui.moveTo(*list(output[3][1]))
             num_labels = output[0]-1
 
             centroids = output[3][1:]
