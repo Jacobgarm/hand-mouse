@@ -4,7 +4,7 @@ import pyautogui
 import keyboard
 
 def track_mouse(mirror=False):
-    cam = cv2.VideoCapture(0)
+    cam = cv2.VideoCapture(1)
 
     sensitivity = 3
     pre_pos = None
@@ -19,24 +19,31 @@ def track_mouse(mirror=False):
 
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
-        color_lower = np.array([65,30,20])
-        color_upper = np.array([100,190,135])
+        #color_lower = np.array([65,30,20])
+        #color_upper = np.array([100,190,135])
+        
+        color_lower = np.array([0,114,29])
+        color_upper = np.array([9,185,113])
 
         mask = cv2.inRange(hsv, color_lower, color_upper)
 
-        connectivity = 2  
+        connectivity = 8
         output = cv2.connectedComponentsWithStats(mask, connectivity, cv2.CV_32S)
 
-        if len(output[3]) > 1:
-            pos = [*output[3][1]]
-            #print('Position:', pos)
+        try:
+            if len(output[3]) > 1:
+                pos = [*output[3][1]]
+                #print('Position:', pos)
 
-            if pre_pos and not keyboard.is_pressed('ctrl'):
-                pyautogui.move((pos[0] - pre_pos[0]) * sensitivity, (pos[1] - pre_pos[1]) * sensitivity)
+                if pre_pos and not keyboard.is_pressed('ctrl'):
+                    pyautogui.move((pos[0] - pre_pos[0]) * sensitivity, (pos[1] - pre_pos[1]) * sensitivity, _pause=False)
 
-            pre_pos = pos
+                pre_pos = pos
 
-        cv2.imshow('Green Mask', mask)
+            #cv2.imshow('Green Mask', mask)
+        
+        except Exception as e:
+            print(e)
 
         if cv2.waitKey(1) == 27: 
             break  # esc to quit
